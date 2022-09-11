@@ -20,6 +20,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Fetch all history for all tags and branches
+      run: git fetch --prune --unshallow --tags
+
     - name: Show Filesystem
       shell: pwsh
       run: |
