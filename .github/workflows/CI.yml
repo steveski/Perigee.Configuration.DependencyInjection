@@ -20,6 +20,11 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Show Filesystem
+      shell: pwsh
+      run: |
+        dir
+
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v0.9.7
       with:
