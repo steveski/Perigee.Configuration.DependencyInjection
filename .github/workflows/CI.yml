@@ -52,7 +52,7 @@ jobs:
     - name: Publish NuGet
       uses: brandedoutcast/publish-nuget@v2.5.5
       with:
-        PROJECT_FILE_PATH: Perigee.Framework.EntityFramework/Perigee.Framework.EntityFramework.csproj
-        PACKAGE_NAME: Perigee.Framework.EntityFramework
+        PROJECT_FILE_PATH: Perigee.Configuration.DependencyInjection/Perigee.Configuration.DependencyInjection.csproj
+        PACKAGE_NAME: Perigee.Configuration.DependencyInjection
         NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
         NUGET_SOURCE: https://api.nuget.org
