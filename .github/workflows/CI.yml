@@ -23,11 +23,6 @@ jobs:
     - name: Fetch all history for all tags and branches
       run: git fetch --prune --unshallow --tags
 
-    - name: Show Filesystem
-      shell: pwsh
-      run: |
-        dir
-
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v0.9.7
       with:
@@ -38,26 +33,26 @@ jobs:
       uses: gittools/actions/gitversion/execute@v0.9.7
       with:
         useConfigFile: true
-        #configFilePath: ./GitVersion.yml
+        configFilePath: ./GitVersion.yml
 
-    #- name: Setup .NET
-    #  uses: actions/setup-dotnet@v2
-    #  with:
-    #    dotnet-version: 6.0.x
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
 
-    #- name: Restore dependencies
-    #  run: dotnet restore
+    - name: Restore dependencies
+      run: dotnet restore
 
-    #- name: Build
-    #  run: dotnet build --configuration Release --no-restore
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
 
-    #- name: Test
-    #  run: dotnet test -c Release --no-build --verbosity normal
+    - name: Test
+      run: dotnet test -c Release --no-build --verbosity normal
 
-    #- name: Publish NuGet
-    #  uses: brandedoutcast/publish-nuget@v2.5.5
-    #  with:
-    #    PROJECT_FILE_PATH: Perigee.Framework.EntityFramework/Perigee.Framework.EntityFramework.csproj
-    #    PACKAGE_NAME: Perigee.Framework.EntityFramework
-    #    NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
-    #    NUGET_SOURCE: https://api.nuget.org
+    - name: Publish NuGet
+      uses: brandedoutcast/publish-nuget@v2.5.5
+      with:
+        PROJECT_FILE_PATH: Perigee.Framework.EntityFramework/Perigee.Framework.EntityFramework.csproj
+        PACKAGE_NAME: Perigee.Framework.EntityFramework
+        NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
+        NUGET_SOURCE: https://api.nuget.org
