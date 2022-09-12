@@ -61,7 +61,7 @@ jobs:
       run: dotnet test -c Release --no-build --verbosity normal
 
     - name: Publish NuGet
-      uses: brandedoutcast/publish-nuget@v2.5.5
+      uses: brandedoutcast/publish-nuget@v2.5.2
       with:
         PROJECT_FILE_PATH: Perigee.Configuration.DependencyInjection/Perigee.Configuration.DependencyInjection.csproj
         PACKAGE_NAME: Perigee.Configuration.DependencyInjection
