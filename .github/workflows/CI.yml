@@ -22,6 +22,9 @@ jobs:
 
     - name: Fetch all history for all tags and branches
       run: git fetch --prune --unshallow --tags
+      
+    - name: Check the git branch in use
+      run: git branch
 
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v0.9.7
