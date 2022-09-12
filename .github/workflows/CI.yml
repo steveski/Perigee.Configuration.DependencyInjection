@@ -1,0 +1,69 @@
+name: CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - 'v*.*.*'
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Fetch all history for all tags and branches
+      run: git fetch --prune --unshallow --tags
+      
+    - name: Check the git branch in use
+      run: git branch
+
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v0.9.7
+      with:
+        versionSpec: '5.5.0'
+      
+    - name: Determine Version
+      id: gitversion # step id used as reference for output values
+      uses: gittools/actions/gitversion/execute@v0.9.7
+      with:
+        useConfigFile: true
+        configFilePath: ./GitVersion.yml
+
+    - name: Update project version
+      uses: roryprimrose/set-vs-sdk-project-version@v1
+      with:
+        version: ${{ steps.gitversion.outputs.NuGetVersionV2 }}
+        assemblyVersion: ${{ steps.gitversion.outputs.AssemblySemVer }}
+        fileVersion: ${{ steps.gitversion.outputs.MajorMinorPatch }}
+        informationalVersion: ${{ steps.gitversion.outputs.InformationalVersion }}
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Test
+      run: dotnet test -c Release --no-build --verbosity normal
+
+    - name: Publish NuGet
+      uses: brandedoutcast/publish-nuget@v2.5.2
+      with:
+        PROJECT_FILE_PATH: Perigee.Configuration.DependencyInjection/Perigee.Configuration.DependencyInjection.csproj
+        PACKAGE_NAME: Perigee.Configuration.DependencyInjection
+        NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
+        NUGET_SOURCE: https://api.nuget.org
