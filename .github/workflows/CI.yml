@@ -102,7 +102,7 @@ jobs:
     - name: Publish to MyGet.org
       env: 
         MYGET_API_KEY: ${{ secrets.MYGET_API_KEY }}
-      run: nuget push *.*.symbols.nupkg MYGET_API_KEY -source https://www.myget.org/F/steveski-ci/api/v3/index.json
+      run: nuget push *.*.symbols.nupkg $MYGET_API_KEY -source https://www.myget.org/F/steveski-ci/api/v3/index.json
 
       
   release:
