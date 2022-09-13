@@ -24,7 +24,6 @@ public class ConfigurationRegistrar
         _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
     }
 
-    /// <inheritdoc />
     public void RegisterConfiguration(IServiceCollection serviceCollection)
     {
         var configuration = _resolver.Resolve();

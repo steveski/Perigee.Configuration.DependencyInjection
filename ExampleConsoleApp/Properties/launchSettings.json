@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ExampleConsoleApp": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Local"
+      }
+    }
+  }
+}
