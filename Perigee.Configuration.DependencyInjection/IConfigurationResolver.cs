@@ -1,15 +1,14 @@
-﻿namespace Perigee.Configuration
+﻿namespace Perigee.Configuration.DependencyInjection;
+
+/// <summary>
+/// The <see cref="IConfigurationResolver"/>
+/// interface defines the members for resolving a configuration value.
+/// </summary>
+public interface IConfigurationResolver
 {
     /// <summary>
-    /// The <see cref="IConfigurationResolver"/>
-    /// interface defines the members for resolving a configuration value.
+    /// Resolves the root configuration value.
     /// </summary>
-    public interface IConfigurationResolver
-    {
-        /// <summary>
-        /// Resolves the root configuration value.
-        /// </summary>
-        /// <returns>The configuration value.</returns>
-        object? Resolve();
-    }
+    /// <returns>The configuration value.</returns>
+    object? Resolve();
 }

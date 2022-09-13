@@ -1,65 +1,64 @@
-﻿namespace Perigee.Configuration
+﻿namespace Perigee.Configuration.DependencyInjection;
+
+using Microsoft.Extensions.Configuration;
+using System;
+
+/// <summary>
+/// The <see cref="JsonResolver{T}"/>
+/// class provides configuration support for loading the configuration from a json file.
+/// </summary>
+/// <typeparam name="T">The type of class to create from the configuration file.</typeparam>
+public class JsonResolver<T> : IConfigurationResolver
 {
-    using System;
-    using Microsoft.Extensions.Configuration;
+    /// <summary>
+    /// Initializes a new instance of the <see cref="JsonResolver{T}"/>.
+    /// </summary>
+    public JsonResolver()
+    {
+        JsonFilename = "appsettings.json";
+    }
 
     /// <summary>
-    /// The <see cref="JsonResolver{T}"/>
-    /// class provides configuration support for loading the configuration from a json file.
+    /// Initializes a new instance of the <see cref="JsonResolver{T}"/>.
     /// </summary>
-    /// <typeparam name="T">The type of class to create from the configuration file.</typeparam>
-    public class JsonResolver<T> : IConfigurationResolver
+    /// <param name="filename">The filename of the json file to load.</param>
+    public JsonResolver(string filename)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="JsonResolver{T}"/>.
-        /// </summary>
-        public JsonResolver()
+        if (string.IsNullOrWhiteSpace(filename))
         {
-            JsonFilename = "appsettings.json";
+            throw new ArgumentException(nameof(filename));
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="JsonResolver{T}"/>.
-        /// </summary>
-        /// <param name="filename">The filename of the json file to load.</param>
-        public JsonResolver(string filename)
-        {
-            if (string.IsNullOrWhiteSpace(filename))
-            {
-                throw new ArgumentException(nameof(filename));
-            }
-
-            JsonFilename = filename;
-        }
-
-        /// <inheritdoc />
-        public object Resolve()
-        {
-            var builder = new ConfigurationBuilder()
-                .AddJsonFile(JsonFilename, false, true);
-
-            ConfigureBuilder(builder);
-
-            var configurationRoot = builder
-                .Build();
-
-            //var config = configurationRoot.Get(typeof(T));
-            var config = configurationRoot.Get<T>();
-
-            return config;
-        }
-
-        /// <summary>
-        /// Configures the builder for resolving configuration data.
-        /// </summary>
-        /// <param name="builder">The builder.</param>
-        protected virtual void ConfigureBuilder(IConfigurationBuilder builder)
-        {
-        }
-
-        /// <summary>
-        /// Gets the filename to load configuration values from.
-        /// </summary>
-        public virtual string JsonFilename { get; }
+        JsonFilename = filename;
     }
+
+    /// <inheritdoc />
+    public object Resolve()
+    {
+        var builder = new ConfigurationBuilder()
+            .AddJsonFile(JsonFilename, false, true);
+
+        ConfigureBuilder(builder);
+
+        var configurationRoot = builder
+            .Build();
+
+        //var config = configurationRoot.Get(typeof(T));
+        var config = configurationRoot.Get<T>();
+
+        return config;
+    }
+
+    /// <summary>
+    /// Configures the builder for resolving configuration data.
+    /// </summary>
+    /// <param name="builder">The builder.</param>
+    protected virtual void ConfigureBuilder(IConfigurationBuilder builder)
+    {
+    }
+
+    /// <summary>
+    /// Gets the filename to load configuration values from.
+    /// </summary>
+    public virtual string JsonFilename { get; }
 }

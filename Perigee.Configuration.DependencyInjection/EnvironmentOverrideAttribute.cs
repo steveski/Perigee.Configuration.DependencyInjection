@@ -1,4 +1,4 @@
-﻿namespace Perigee.Configuration;
+﻿namespace Perigee.Configuration.DependencyInjection;
 
 using System;
 
