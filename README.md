@@ -12,7 +12,7 @@ Provides a simple process for registering nested configuration types on an IServ
 The package can be installed from NuGet using Install-Package Perigee.Configuration.DependencyInjection
 
 ### Usage
-The most basic approach is when just using a single `appsettings.json` file for application configuration. You need to create the registrar and then apply the resolved Json configuration to the IServiceCollection. The following demonstrates registration in a .NET6.0 console application 
+The most basic approach is when just using a single `appsettings.json` file for application configuration. All you need is to call the IServiceCollection extension method `RegisterAppSettings`. The following demonstrates registration in a .NET6.0 console application 
 ```csharp
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,8 +22,7 @@ using Perigee.Configuration;
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((hostBuilderContext, services) =>
     {
-        var registrar = new ConfigurationRegistrar<JsonResolver<Config>>();
-        registrar.RegisterConfiguration(services);
+        services.RegisterAppSettings<Config>();
 
         services.AddTransient<App>();
     })
@@ -33,7 +32,7 @@ var app = host.Services.GetRequiredService<App>();
 app.Run();
 ```
 
-If you are using appsettings override files named `appsettings.<environment>.json` then you can use the `EnvironmentJsonResolver`
+If you are using appsettings override files named `appsettings.<environment>.json` then you can pass in the filename. Either explicitly specify the filename to use or derive the environment name from the hosting environment.
 ```csharp
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,11 +42,9 @@ using Perigee.Configuration;
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((hostBuilderContext, services) =>
     {
+        // Provide environment override appsettings file
         var env = hostBuilderContext.HostingEnvironment;
-
-        var resolver = new EnvironmentJsonResolver<Config>("appsettings.json", $"appsettings.{env.EnvironmentName}.json");
-        var registrar = new ConfigurationRegistrar(resolver);
-        registrar.RegisterConfiguration(services);
+        services.RegisterAppSettings<Config>($"appsettings.{env.EnvironmentName}.json");
 
         services.AddTransient<App>();
 
@@ -57,6 +54,7 @@ var host = Host.CreateDefaultBuilder(args)
 var app = host.Services.GetRequiredService<App>();
 app.Run();
 ```
+
 Note that `hostBuilderContext.HostingEnvironment` reads an environment variable which can be set for the visual studio configuration under `Properties\launchSettings.json`. Either ASPNETCORE_ENVIRONMENT or DOTNET_ENVIRONMENT will be read with ASPNETCORE_ENVIRONMENT taking precedence.
 ```json
 {
@@ -70,6 +68,7 @@ Note that `hostBuilderContext.HostingEnvironment` reads an environment variable 
   }
 }
 ```
+
 Because App has been registered with the `IServiceCollection` it can be injected with any types registered from the appsettings.json. Consider the following appsettings.json
 ```json
 {
@@ -86,6 +85,7 @@ Because App has been registered with the `IServiceCollection` it can be injected
   }
 }
 ```
+
 `Logging` will be ignored for the purposes of service registration so to register Database as itself as well as an interface of IDatabase then the following Config class object graph should be defined.
 ```csharp
 public class Config

@@ -8,7 +8,7 @@ var host = Host.CreateDefaultBuilder(args)
     {
         var env = hostBuilderContext.HostingEnvironment;
         services.RegisterAppSettings<Config>($"appsettings.{env.EnvironmentName}.json");
-        
+
         services.AddTransient<App>();
 
     })
