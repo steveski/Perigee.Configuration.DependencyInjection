@@ -126,6 +126,29 @@ public class App
 
 }
 ```
+
+### Alternate scenarios
+You can source json configuration fro registration from a Stream which is useful if your configuration is provided by some online service or an embedded resource, which is something you would use in a .NET MAUI application
+```
+    .
+    .
+    .
+    .ConfigureServices((hostBuilderContext, services) =>
+    {
+        var a = Assembly.GetExecutingAssembly();
+        using var stream = a.GetManifestResourceStream("<Name Of Executable>.appsettings.json");
+        services.RegisterAppSettingsFromStream<Config>(stream);
+
+        services.AddTransient<App>();
+
+    })
+    .
+    .
+    .
+
+```
+
+
 This project is based on Rory Primrose's work https://github.com/roryprimrose/Divergic.Configuration.Autofac but removed the dependency on AutoFac sticking with the built in Microsoft DI.
 
 
