@@ -56,9 +56,9 @@ jobs:
 
     - name: Test
       run: dotnet test -c Release --no-build --verbosity normal
-
-    ## TODO:
-    ##- name: Generate coverage report
+    
+    - name: Generate coverage report
+      run: curl -Os https://uploader.codecov.io/latest/linux/codecov chmod +x codecov ./codecov
 
     - name: Resolve project name
       shell: pwsh
@@ -83,7 +83,6 @@ jobs:
         name: version
         path: version.txt
       
-
   publish:
     needs: build
     runs-on: ubuntu-latest
