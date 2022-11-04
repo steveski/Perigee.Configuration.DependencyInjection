@@ -58,11 +58,19 @@ jobs:
     - name: Test
       run: dotnet test -c Release --no-build --verbosity normal
     
-    - name: Generate coverage report
-      run: |
-        curl -Os https://uploader.codecov.io/latest/linux/codecov
-        chmod +x codecov
-        ./codecov
+    #- name: Generate coverage report
+    #  run: |
+    #    curl -Os https://uploader.codecov.io/latest/linux/codecov
+    #    chmod +x codecov
+    #    ./codecov
+    
+    - name: Codecov
+      # You may pin to the exact commit or the version.
+      # uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70
+      uses: codecov/codecov-action@v3.1.1
+      with:
+        token: $CODECOV_TOKEN
+        verbose: true
 
     - name: Resolve project name
       shell: pwsh
