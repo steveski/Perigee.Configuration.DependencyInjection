@@ -14,9 +14,10 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
+    env:
+      CODECOV_TOKEN: $CODECOV_TOKEN
+   
     steps:
     - uses: actions/checkout@v3
 
@@ -104,7 +105,7 @@ jobs:
     - name: Publish to MyGet.org
       env: 
         MYGET_API_KEY: ${{ secrets.MYGET_API_KEY }}
-      run: nuget push *.*.symbols.nupkg $MYGET_API_KEY -source https://www.myget.org/F/steveski-ci/api/v3/index.json
+      run: nuget push *.*.symbols.nupkg $MYGET_API_KEY -SkipDuplicate -source https://www.myget.org/F/steveski-ci/api/v3/index.json
 
       
   release:
@@ -142,7 +143,7 @@ jobs:
     - name: Publish to NuGet.org
       env: 
         NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-      run: nuget push *.*.symbols.nupkg $NUGET_API_KEY -source https://api.nuget.org/v3/index.json
+      run: nuget push *.*.symbols.nupkg $NUGET_API_KEY -SkipDuplicate -source https://api.nuget.org/v3/index.json
 
     - name: Create release
       id: create_release
