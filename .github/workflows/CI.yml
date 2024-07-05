@@ -91,7 +91,8 @@ jobs:
       uses: actions/upload-artifact@v4.3.3
       with:
         name: packages
-        path: $GITHUB_WORKSPACE/staging/
+        path: $GITHUB_WORKSPACE/staging/*.npkg
+
 
     - shell: bash
       name: Write version
