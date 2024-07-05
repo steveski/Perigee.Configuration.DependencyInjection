@@ -92,7 +92,10 @@ jobs:
       with:
         name: packages
         path: $GITHUB_WORKSPACE/staging
-    
+        
+    - name: Verify---- artifact path
+      run: ls -la $GITHUB_WORKSPACE/staging
+      
     - shell: bash
       name: Write version
       run: |
