@@ -92,14 +92,12 @@ jobs:
       with:
         name: packages
         path: $GITHUB_WORKSPACE/staging
-        
-    - name: Verify---- artifact path
-      run: ls -la $GITHUB_WORKSPACE/staging
-      
+
     - shell: bash
       name: Write version
       run: |
         echo '${{ steps.gitversion.outputs.NuGetVersionV2 }}' > version.txt
+        
     - name: Upload version
       uses: actions/upload-artifact@v3
       with:
@@ -118,6 +116,9 @@ jobs:
     #  with:
     #    name: packages
 
+    - name: Verify artifact path
+      run: ls -la $GITHUB_WORKSPACE/staging
+      
     - name: Setup nuget
       uses: nuget/setup-nuget@v1
 
