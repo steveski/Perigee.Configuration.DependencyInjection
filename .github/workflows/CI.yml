@@ -105,6 +105,9 @@ jobs:
     #    name: version
     #    path: version.txt
 
+    - name: NuGetVersionV2
+      run: echo ${{ env.NuGetVersionV2 }}
+      
   publish:
     needs: build
     runs-on: ubuntu-latest
