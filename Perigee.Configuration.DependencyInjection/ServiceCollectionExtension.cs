@@ -51,9 +51,9 @@ public static class ServiceCollectionExtension
     /// <typeparam name="T">The type of the class which will represent the root of the appsettings.json file</typeparam>
     /// <param name="serviceCollection">An existing <see cref="IServiceCollection"/> where registrations will be added</param>
     /// <param name="stream">The stream containing the json configuration you would like to register</param>
-    public static void RegisterAppSettingsFromStream<T>(this IServiceCollection serviceCollection, Stream? stream)
+    public static void RegisterAppSettings<T>(this IServiceCollection serviceCollection, Stream? stream)
     {
-        if (stream is null) throw new ArgumentNullException(nameof(stream), $"{nameof(RegisterAppSettingsFromStream)} received a null parameter");
+        if (stream is null) throw new ArgumentNullException(nameof(stream), $"{nameof(RegisterAppSettings)} received a null parameter");
 
         var resolver = new StreamJsonResolver<T>(stream);
         var registrar = new ConfigurationRegistrar(resolver);
