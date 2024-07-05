@@ -134,7 +134,7 @@ jobs:
     - name: Publish to MyGet.org
       env:
         MYGET_API_KEY: ${{ secrets.MYGET_API_KEY }}
-      run: nuget push $GITHUB_WORKSPACE/staging/*.nupkg -ApiKey $MYGET_API_KEY -SkipDuplicate -Source https://www.myget.org/F/steveski-ci/api/v3/index.json
+      run: nuget push $GITHUB_WORKSPACE/*.nupkg -ApiKey $MYGET_API_KEY -SkipDuplicate -Source https://www.myget.org/F/steveski-ci/api/v3/index.json
 
   release:
     needs: build
@@ -168,7 +168,7 @@ jobs:
     - name: Publish to NuGet.org
       env:
         NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-      run: nuget push $GITHUB_WORKSPACE/staging/*.nupkg -ApiKey $NUGET_API_KEY -SkipDuplicate -Source https://api.nuget.org/v3/index.json
+      run: nuget push $GITHUB_WORKSPACE/*.nupkg -ApiKey $NUGET_API_KEY -SkipDuplicate -Source https://api.nuget.org/v3/index.json
 
     - name: Create release
       id: create_release
@@ -188,7 +188,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: $GITHUB_WORKSPACE/staging/*.nupkg
+        asset_path: $GITHUB_WORKSPACE/*.nupkg
         asset_name: ${{ env.projectName }}.${{ env.NuGetVersionV2 }}.nupkg
         asset_content_type: application/zip
 
