@@ -138,12 +138,6 @@ jobs:
       uses: actions/download-artifact@v4.1.7
       with:
         name: packages
-
-    - name: Verify artifact path
-      run: ls -la $GITHUB_WORKSPACE
-        
-    - name: Verify artifact path
-      run: ls -la $GITHUB_WORKSPACE
       
     - name: Resolve project name
       shell: pwsh
@@ -171,6 +165,9 @@ jobs:
         draft: false
         prerelease: ${{ contains(needs.build.outputs.NuGetVersionV2, 'beta') }}
 
+    - name: Verify Pre Asset upload
+      run: ls -la $GITHUB_WORKSPACE
+
     - name: Upload release asset for package
       id: upload-release-asset-package
       uses: actions/upload-release-asset@v1.0.2
@@ -178,7 +175,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: $GITHUB_WORKSPACE/*.nupkg
+        asset_path: ./*.nupkg
         asset_name: ${{ env.projectName }}.${{ needs.build.outputs.NuGetVersionV2 }}.nupkg
         asset_content_type: application/zip
 
@@ -189,6 +186,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: $GITHUB_WORKSPACE/staging/*.symbols.nupkg
+        asset_path: ./*.symbols.nupkg
         asset_name: ${{ env.projectName }}.${{ needs.build.outputs.NuGetVersionV2 }}.symbols.nupkg
         asset_content_type: application/zip
