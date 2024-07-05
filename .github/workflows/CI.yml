@@ -94,16 +94,16 @@ jobs:
         path: staging
         if-no-files-found: error
 
-    - shell: bash
-      name: Display version
-      run: |
-        echo '${{ steps.gitversion.outputs.NuGetVersionV2 }}' > version.txt
+    #- shell: bash
+    #  name: Display version
+    #  run: |
+    #    echo '${{ steps.gitversion.outputs.NuGetVersionV2 }}' > version.txt
         
-    - name: Upload version
-      uses: actions/upload-artifact@v3
-      with:
-        name: version
-        path: version.txt
+    #- name: Upload version
+    #  uses: actions/upload-artifact@v3
+    #  with:
+    #    name: version
+    #    path: version.txt
 
   publish:
     needs: build
@@ -144,22 +144,22 @@ jobs:
     steps:
     - name: Download packages
       uses: actions/download-artifact@v4.1.7
-      #with:
-      #  name: packages
+      with:
+        name: packages
 
-    - name: Download version
-      uses: actions/download-artifact@v4.1.7
+    #- name: Download version
+      #uses: actions/download-artifact@v4.1.7
       #with:
       #  name: version
         
     - name: Verify artifact path
       run: ls -la $GITHUB_WORKSPACE
 
-    - name: Read version
-      shell: bash
-      run: |
-        value=`cat version.txt`
-        echo NuGetVersionV2=$(echo $value) >> $GITHUB_ENV
+    #- name: Read version
+    #  shell: bash
+    #  run: |
+    #    value=`cat version.txt`
+    #    echo NuGetVersionV2=$(echo $value) >> $GITHUB_ENV
         
     - name: Verify artifact path
       run: ls -la $GITHUB_WORKSPACE
