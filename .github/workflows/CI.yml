@@ -111,10 +111,13 @@ jobs:
     if: github.event_name == 'push'
 
     steps:
+    - name: Check path before download
+      run: ls -la $GITHUB_WORKSPACE
+      
     - name: Download packages
       uses: actions/download-artifact@v4.1.7
-      with:
-        name: packages
+      #with:
+      #  name: packages
         
     - shell: bash
       name: GITHUB_WORKSPACE
