@@ -115,9 +115,13 @@ jobs:
     #  uses: actions/download-artifact@v2
     #  with:
     #    name: packages
-
+    - shell: bash
+      name: Write version
+      run: |
+        echo $GITHUB_WORKSPACE
+        
     - name: Verify artifact path
-      run: ls -la $GITHUB_WORKSPACE/staging
+      run: ls -la $GITHUB_WORKSPACE
       
     - name: Setup nuget
       uses: nuget/setup-nuget@v1
