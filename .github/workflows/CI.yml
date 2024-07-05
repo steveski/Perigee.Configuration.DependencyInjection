@@ -102,7 +102,7 @@ jobs:
       with:
         name: version
         path: version.txt
-      
+
   publish:
     needs: build
     runs-on: ubuntu-latest
@@ -119,33 +119,31 @@ jobs:
       uses: nuget/setup-nuget@v1
 
     - name: Publish to MyGet.org
-      env: 
+      env:
         MYGET_API_KEY: ${{ secrets.MYGET_API_KEY }}
-      run: nuget push $GITHUB_WORKSPACE/packages/*.nupkg -ApiKey $MYGET_API_KEY -SkipDuplicate -Source https://www.myget.org/F/steveski-ci/api/v3/index.json
+      run: nuget push $GITHUB_WORKSPACE/staging/*.nupkg -ApiKey $MYGET_API_KEY -SkipDuplicate -Source https://www.myget.org/F/steveski-ci/api/v3/index.json
 
   release:
     needs: build
     runs-on: ubuntu-latest
-    # Only run on pushes which should only be on the base repository and only where the branch is master or is a version tagged build
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
 
     steps:
-    
     - name: Download packages
       uses: actions/download-artifact@v2
       with:
         name: packages
-      
+
     - name: Download version
       uses: actions/download-artifact@v2
       with:
         name: version
-    
+
     - name: Read version
       shell: bash
       run: |
         value=`cat version.txt`
-        echo NuGetVersionV2=$(echo $value) >> $GITHUB_ENV 
+        echo NuGetVersionV2=$(echo $value) >> $GITHUB_ENV
 
     - name: Resolve project name
       shell: pwsh
@@ -155,9 +153,9 @@ jobs:
       uses: nuget/setup-nuget@v1
 
     - name: Publish to NuGet.org
-      env: 
+      env:
         NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-      run: nuget push $GITHUB_WORKSPACE/packages/*.nupkg -ApiKey $NUGET_API_KEY -SkipDuplicate -Source https://api.nuget.org/v3/index.json
+      run: nuget push $GITHUB_WORKSPACE/staging/*.nupkg -ApiKey $NUGET_API_KEY -SkipDuplicate -Source https://api.nuget.org/v3/index.json
 
     - name: Create release
       id: create_release
@@ -169,7 +167,7 @@ jobs:
         release_name: Release ${{ env.NuGetVersionV2 }}
         draft: false
         prerelease: ${{ contains(env.NuGetVersionV2, 'beta') }}
-    
+
     - name: Upload release asset for package
       id: upload-release-asset-package
       uses: actions/upload-release-asset@v1.0.2
@@ -177,10 +175,10 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: $GITHUB_WORKSPACE/packages/*.nupkg
+        asset_path: $GITHUB_WORKSPACE/staging/*.nupkg
         asset_name: ${{ env.projectName }}.${{ env.NuGetVersionV2 }}.nupkg
         asset_content_type: application/zip
-    
+
     - name: Upload release asset for symbol package
       id: upload-release-asset-symbolpackage
       uses: actions/upload-release-asset@v1.0.2
@@ -188,6 +186,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: $GITHUB_WORKSPACE/packages/*.symbols.nupkg
+        asset_path: $GITHUB_WORKSPACE/staging/*.symbols.nupkg
         asset_name: ${{ env.projectName }}.${{ env.NuGetVersionV2 }}.symbols.nupkg
         asset_content_type: application/zip
