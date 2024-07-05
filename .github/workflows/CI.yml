@@ -111,12 +111,13 @@ jobs:
     if: github.event_name == 'push'
 
     steps:
-    #- name: Download packages
-    #  uses: actions/download-artifact@v2
-    #  with:
-    #    name: packages
+    - name: Download packages
+      uses: actions/download-artifact@v2
+      with:
+        name: packages
+        
     - shell: bash
-      name: Write version
+      name: GITHUB_WORKSPACE
       run: |
         echo $GITHUB_WORKSPACE
         
