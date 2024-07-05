@@ -85,19 +85,19 @@ jobs:
       run: dotnet pack "./${{ env.projectName }}/${{ env.projectName }}.csproj" -c Release --no-build --include-symbols -o $GITHUB_WORKSPACE/staging
 
     - name: Verify artifact path
-      run: ls -la $GITHUB_WORKSPACE/staging
+      run: ls -la taging
 
     - name: Publish build artifacts
       uses: actions/upload-artifact@v4.3.3
       with:
         name: packages
-        path: $GITHUB_WORKSPACE/staging/*.nupkg
+        path: staging
         if-no-files-found: error
 
     - shell: bash
-      name: Write version
+      name: Display version
       run: |
-        echo '${{ steps.gitversion.outputs.NuGetVersionV2 }}' > version.txt
+        echo '${{ steps.gitversion.outputs.NuGetVersionV2 }}'
         
     - name: Upload version
       uses: actions/upload-artifact@v3
@@ -117,8 +117,8 @@ jobs:
       
     - name: Download packages
       uses: actions/download-artifact@v4.1.7
-      #with:
-      #  name: packages
+      with:
+        name: packages
         
     - shell: bash
       name: GITHUB_WORKSPACE
