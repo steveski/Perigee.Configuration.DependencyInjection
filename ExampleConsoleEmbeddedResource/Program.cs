@@ -10,7 +10,7 @@ var host = Host.CreateDefaultBuilder(args)
     {
         var a = Assembly.GetExecutingAssembly();
         using var stream = a.GetManifestResourceStream("ExampleConsoleEmbeddedResource.appsettings.json");
-        services.RegisterAppSettingsFromStream<Config>(stream);
+        services.RegisterAppSettings<Config>(stream);
 
         services.AddTransient<App>();
 
