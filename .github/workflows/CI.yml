@@ -115,10 +115,10 @@ jobs:
     - name: Setup nuget
       uses: nuget/setup-nuget@v1
             
-    - name: Publish to MyGet.org
-      env: 
-        MYGET_API_KEY: ${{ secrets.MYGET_API_KEY }}
-      run: nuget push *.nupkg $MYGET_API_KEY -SkipDuplicate -source https://www.myget.org/F/steveski-ci/api/v3/index.json
+    #- name: Publish to MyGet.org
+    #  env: 
+    #    MYGET_API_KEY: ${{ secrets.MYGET_API_KEY }}
+    #  run: nuget push *.nupkg $MYGET_API_KEY -SkipDuplicate -source https://www.myget.org/F/steveski-ci/api/v3/index.json
 
       
   release:
