@@ -157,7 +157,10 @@ jobs:
       run: |
         value=`cat version.txt`
         echo NuGetVersionV2=$(echo $value) >> $GITHUB_ENV
-
+        
+    - name: Verify artifact path
+      run: ls -la $GITHUB_WORKSPACE
+      
     - name: Resolve project name
       shell: pwsh
       run: Add-Content -Path ${env:GITHUB_ENV} "`nprojectName=$(${env:GITHUB_REPOSITORY}.substring(${env:GITHUB_REPOSITORY}.IndexOf('/') + 1))" -Encoding utf8
