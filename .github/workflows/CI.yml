@@ -178,7 +178,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./*.nupkg
+        asset_path: ${{ env.projectName }}.${{ needs.build.outputs.NuGetVersionV2 }}.nupkg
         asset_name: ${{ env.projectName }}.${{ needs.build.outputs.NuGetVersionV2 }}.nupkg
         asset_content_type: application/zip
 
@@ -189,6 +189,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./*.symbols.nupkg
+        asset_path: ${{ env.projectName }}.${{ needs.build.outputs.NuGetVersionV2 }}.symbols.nupkg
         asset_name: ${{ env.projectName }}.${{ needs.build.outputs.NuGetVersionV2 }}.symbols.nupkg
         asset_content_type: application/zip
