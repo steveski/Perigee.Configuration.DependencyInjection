@@ -151,6 +151,9 @@ jobs:
       uses: actions/download-artifact@v4.1.7
       #with:
       #  name: version
+        
+    - name: Verify artifact path
+      run: ls -la $GITHUB_WORKSPACE
 
     - name: Read version
       shell: bash
