@@ -97,7 +97,7 @@ jobs:
     - shell: bash
       name: Display version
       run: |
-        echo '${{ steps.gitversion.outputs.NuGetVersionV2 }}'
+        echo '${{ steps.gitversion.outputs.NuGetVersionV2 }}' > version.txt
         
     - name: Upload version
       uses: actions/upload-artifact@v3
