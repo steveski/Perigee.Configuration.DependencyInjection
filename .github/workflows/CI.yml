@@ -1,7 +1,5 @@
 name: CI
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
 on:
   push:
     branches:
@@ -17,13 +15,36 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-   
+      
+    outputs:
+      NuGetVersionV2: ${{ steps.gitversion.outputs.NuGetVersionV2 }}
+      
     steps:
     - uses: actions/checkout@v3
 
     - name: Fetch all history for all tags and branches
       run: git fetch --prune --unshallow --tags
 
+    - name: Setup .NET Core 3.1
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: '3.1.x'
+
+    - name: Setup .NET 6
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: '6.0.x'
+
+    - name: Setup .NET 7
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: '7.0.x'
+
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: '8.0.x'
+    
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v0.9.7
       with:
@@ -44,11 +65,6 @@ jobs:
         fileVersion: ${{ steps.gitversion.outputs.MajorMinorPatch }}
         informationalVersion: ${{ steps.gitversion.outputs.InformationalVersion }}
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: 6.0.x
-
     - name: Restore dependencies
       run: dotnet restore
 
@@ -58,19 +74,11 @@ jobs:
     - name: Test
       run: dotnet test -c Release --no-build --verbosity normal
     
-    #- name: Generate coverage report
-    #  run: |
-    #    curl -Os https://uploader.codecov.io/latest/linux/codecov
-    #    chmod +x codecov
-    #    ./codecov
-    
-    - name: Codecov
-      # You may pin to the exact commit or the version.
-      # uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70
-      uses: codecov/codecov-action@v3.1.1
-      with:
-        token: $CODECOV_TOKEN
-        verbose: true
+    #- name: Codecov
+    #  uses: codecov/codecov-action@v3.1.1
+    #  with:
+    #    token: $CODECOV_TOKEN
+    #    verbose: true
 
     - name: Resolve project name
       shell: pwsh
@@ -79,21 +87,15 @@ jobs:
     - name: Pack
       run: dotnet pack "./${{ env.projectName }}/${{ env.projectName }}.csproj" -c Release --no-build --include-symbols -o $GITHUB_WORKSPACE/staging
 
+    - name: Verify artifact path
+      run: ls -la staging
+
     - name: Publish build artifacts
-      uses: actions/upload-artifact@master
+      uses: actions/upload-artifact@v4.3.3
       with:
         name: packages
         path: staging
-    
-    - shell: bash
-      name: Write version
-      run: |
-        echo '${{ steps.gitversion.outputs.NuGetVersionV2 }}' > version.txt
-    - name: Upload version
-      uses: actions/upload-artifact@v2
-      with:
-        name: version
-        path: version.txt
+        if-no-files-found: error
       
   publish:
     needs: build
@@ -102,44 +104,47 @@ jobs:
     if: github.event_name == 'push'
 
     steps:
+    - name: Check path before download
+      run: ls -la $GITHUB_WORKSPACE
+      
     - name: Download packages
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4.1.7
       with:
         name: packages
+        
+    - shell: bash
+      name: GITHUB_WORKSPACE
+      run: |
+        echo $GITHUB_WORKSPACE
+        
+    - name: Verify artifact path
+      run: ls -la $GITHUB_WORKSPACE
       
     - name: Setup nuget
       uses: nuget/setup-nuget@v1
-            
-    - name: Publish to MyGet.org
-      env: 
-        MYGET_API_KEY: ${{ secrets.MYGET_API_KEY }}
-      run: nuget push *.*.symbols.nupkg $MYGET_API_KEY -SkipDuplicate -source https://www.myget.org/F/steveski-ci/api/v3/index.json
 
-      
+    - name: Publish to MyGet.org
+      env:
+        MYGET_API_KEY: ${{ secrets.MYGET_API_KEY }}
+      run: nuget push $GITHUB_WORKSPACE/*.nupkg -ApiKey $MYGET_API_KEY -SkipDuplicate -Source https://www.myget.org/F/steveski-ci/api/v3/index.json
+
   release:
     needs: build
     runs-on: ubuntu-latest
-    # Only run on pushes which should only be on the base repository and only where the branch is master or is a version tagged build
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
 
     steps:
-    
     - name: Download packages
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4.1.7
       with:
         name: packages
-      
-    - name: Download version
-      uses: actions/download-artifact@v2
-      with:
-        name: version
-    
-    - name: Read version
-      shell: bash
-      run: |
-        value=`cat version.txt`
-        echo NuGetVersionV2=$(echo $value) >> $GITHUB_ENV 
 
+    - name: Verify artifact path
+      run: ls -la $GITHUB_WORKSPACE
+        
+    - name: Verify artifact path
+      run: ls -la $GITHUB_WORKSPACE
+      
     - name: Resolve project name
       shell: pwsh
       run: Add-Content -Path ${env:GITHUB_ENV} "`nprojectName=$(${env:GITHUB_REPOSITORY}.substring(${env:GITHUB_REPOSITORY}.IndexOf('/') + 1))" -Encoding utf8
@@ -147,23 +152,25 @@ jobs:
     - name: Setup nuget
       uses: nuget/setup-nuget@v1
 
-    #################
     - name: Publish to NuGet.org
-      env: 
+      env:
         NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-      run: nuget push *.*.symbols.nupkg $NUGET_API_KEY -SkipDuplicate -source https://api.nuget.org/v3/index.json
+      run: nuget push $GITHUB_WORKSPACE/*.nupkg -ApiKey $NUGET_API_KEY -SkipDuplicate -Source https://api.nuget.org/v3/index.json
 
+    - name: NuGetVersionV2
+      run: echo ${{ needs.build.outputs.NuGetVersionV2 }}
+    
     - name: Create release
       id: create_release
       uses: actions/create-release@v1.1.4
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ env.NuGetVersionV2 }}
-        release_name: Release ${{ env.NuGetVersionV2 }}
+        tag_name: ${{ needs.build.outputs.NuGetVersionV2 }}
+        release_name: Release ${{ needs.build.outputs.NuGetVersionV2 }}
         draft: false
-        prerelease: ${{ contains(env.NuGetVersionV2, 'beta') }}
-    
+        prerelease: ${{ contains(needs.build.outputs.NuGetVersionV2, 'beta') }}
+
     - name: Upload release asset for package
       id: upload-release-asset-package
       uses: actions/upload-release-asset@v1.0.2
@@ -171,10 +178,10 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ env.projectName }}.${{ env.NuGetVersionV2 }}.nupkg
-        asset_name: ${{ env.projectName }}.${{ env.NuGetVersionV2 }}.nupkg
+        asset_path: $GITHUB_WORKSPACE/*.nupkg
+        asset_name: ${{ env.projectName }}.${{ needs.build.outputs.NuGetVersionV2 }}.nupkg
         asset_content_type: application/zip
-    
+
     - name: Upload release asset for symbol package
       id: upload-release-asset-symbolpackage
       uses: actions/upload-release-asset@v1.0.2
@@ -182,6 +189,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ env.projectName }}.${{ env.NuGetVersionV2 }}.symbols.nupkg
-        asset_name: ${{ env.projectName }}.${{ env.NuGetVersionV2 }}.symbols.nupkg
+        asset_path: $GITHUB_WORKSPACE/staging/*.symbols.nupkg
+        asset_name: ${{ env.projectName }}.${{ needs.build.outputs.NuGetVersionV2 }}.symbols.nupkg
         asset_content_type: application/zip
