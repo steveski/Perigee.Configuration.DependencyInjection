@@ -18,4 +18,4 @@ var host = Host.CreateDefaultBuilder(args)
     .Build();
 
 var app = host.Services.GetRequiredService<App>();
-app.Run();
+await app.Run();

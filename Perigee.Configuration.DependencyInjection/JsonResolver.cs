@@ -26,7 +26,7 @@ public class JsonResolver<T> : IConfigurationResolver
     {
         if (string.IsNullOrWhiteSpace(filename))
         {
-            throw new ArgumentException(nameof(filename));
+            throw new ArgumentException("Filename is required", nameof(filename));
         }
 
         JsonFilename = filename;
@@ -45,8 +45,9 @@ public class JsonResolver<T> : IConfigurationResolver
 
         //var config = configurationRoot.Get(typeof(T));
         var config = configurationRoot.Get<T>();
-
-        return config;
+        return config == null
+            ? throw new InvalidOperationException($"Unable to load appsettings Configuration {typeof(T)}")
+            : (object)config;
     }
 
     /// <summary>

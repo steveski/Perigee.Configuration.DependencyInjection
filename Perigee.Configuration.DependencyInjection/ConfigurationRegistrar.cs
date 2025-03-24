@@ -77,7 +77,7 @@ public class ConfigurationRegistrar
         try
         {
             var converter = TypeDescriptor.GetConverter(property.PropertyType);
-            object converted;
+            object? converted;
 
             if (converter.CanConvertFrom(typeof(string)))
             {
@@ -130,7 +130,7 @@ public class ConfigurationRegistrar
             return;
         }
 
-        if (configType.GetInterfaces().Any())
+        if (configType.GetInterfaces().Length > 0)
         {
             foreach (var interfaceType in configType.GetInterfaces())
             {
@@ -165,7 +165,7 @@ public class ConfigurationRegistrar
                 continue;
             }
 
-            object value;
+            object? value;
 
             try
             {
