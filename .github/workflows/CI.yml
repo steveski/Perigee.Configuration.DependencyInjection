@@ -91,92 +91,68 @@ jobs:
     if: github.event_name == 'push'
 
     steps:
-      - name: Check path before download
-        run: ls -la $GITHUB_WORKSPACE
-        
       - name: Download NuGet packages
         uses: actions/download-artifact@v4
         with:
           name: nuget-packages
-          
-      - shell: bash
-        name: GITHUB_WORKSPACE
+
+      - name: Upload to MyGet (pre-release only)
+        if: needs.build.outputs.isPrerelease == 'true'
         run: |
-          echo $GITHUB_WORKSPACE
-          
-      - name: Verify artifact path
-        run: ls -la $GITHUB_WORKSPACE
-      
-      - name: Publish to MyGet.org
-        run: | #nuget push $GITHUB_WORKSPACE/*.nupkg -ApiKey $MYGET_API_KEY -SkipDuplicate -Source https://www.myget.org/F/steveski-ci/api/v3/index.json
-          dotnet nuget push $GITHUB_WORKSPACE/*.nupkg \
+          find . -name '*.nupkg' -print | while read pkg; do
+            echo "Publishing $pkg to MyGet"
+            dotnet nuget push "$pkg" \
               --api-key ${{ secrets.MYGET_API_KEY }} \
               --source https://www.myget.org/F/steveski-ci/api/v3/index.json \
               --skip-duplicate
+          done
 
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
-
-    steps:
-      - name: Download NuGet packages
-        uses: actions/download-artifact@v4
-        with:
-          name: nuget-packages
-        
-      - name: Resolve project name
-        shell: pwsh
-        run: Add-Content -Path ${env:GITHUB_ENV} "`nprojectName=$(${env:GITHUB_REPOSITORY}.substring(${env:GITHUB_REPOSITORY}.IndexOf('/') + 1))" -Encoding utf8
+      - name: Upload to NuGet (release only)
+        if: needs.build.outputs.isPrerelease == 'false'
+        run: |
+          find . -name '*.nupkg' -print | while read pkg; do
+            echo "Publishing $pkg to NuGet.org"
+            dotnet nuget push "$pkg" \
+              --api-key ${{ secrets.NUGET_API_KEY }} \
+              --source https://api.nuget.org/v3/index.json \
+              --skip-duplicate
+          done
       
-      - name: Setup nuget
-        uses: nuget/setup-nuget@v1
+      # - name: Create release
+      #   id: create_release
+      #   uses: actions/create-release@v1.1.4
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: ${{ needs.build.outputs.NuGetVersionV2 }}
+      #     release_name: Release ${{ needs.build.outputs.NuGetVersionV2 }}
+      #     draft: false
+      #     prerelease: ${{ contains(needs.build.outputs.NuGetVersionV2, 'beta') }}
       
-      - name: Publish to NuGet.org
-        run: | #nuget push $GITHUB_WORKSPACE/*.nupkg -ApiKey $NUGET_API_KEY -SkipDuplicate -Source https://api.nuget.org/v3/index.json
-          dotnet nuget push $GITHUB_WORKSPACE/*.nupkg \
-                --api-key ${{ secrets.NUGET_API_KEY }} \
-                --source https://api.nuget.org/v3/index.json \
-                --skip-duplicate
+      # - name: Verify Pre Asset upload
+      #   run: ls -la $GITHUB_WORKSPACE
       
-      - name: NuGetVersionV2
-        run: echo ${{ needs.build.outputs.NuGetVersionV2 }}
+      # - name: xxx
+      #   run: echo ${{ env.projectName }}.${{ needs.build.outputs.NuGetVersionV2 }}.nupkg
       
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1.1.4
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ needs.build.outputs.NuGetVersionV2 }}
-          release_name: Release ${{ needs.build.outputs.NuGetVersionV2 }}
-          draft: false
-          prerelease: ${{ contains(needs.build.outputs.NuGetVersionV2, 'beta') }}
+      # - name: Upload release asset for package
+      #   id: upload-release-asset-package
+      #   uses: actions/upload-release-asset@v1.0.2
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: ${{ env.projectName }}.${{ needs.build.outputs.NuGetVersionV2 }}.nupkg
+      #     asset_name: ${{ env.projectName }}.${{ needs.build.outputs.NuGetVersionV2 }}.nupkg
+      #     asset_content_type: application/zip
       
-      - name: Verify Pre Asset upload
-        run: ls -la $GITHUB_WORKSPACE
-      
-      - name: xxx
-        run: echo ${{ env.projectName }}.${{ needs.build.outputs.NuGetVersionV2 }}.nupkg
-      
-      - name: Upload release asset for package
-        id: upload-release-asset-package
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ env.projectName }}.${{ needs.build.outputs.NuGetVersionV2 }}.nupkg
-          asset_name: ${{ env.projectName }}.${{ needs.build.outputs.NuGetVersionV2 }}.nupkg
-          asset_content_type: application/zip
-      
-      - name: Upload release asset for symbol package
-        id: upload-release-asset-symbolpackage
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ env.projectName }}.${{ needs.build.outputs.NuGetVersionV2 }}.symbols.nupkg
-          asset_name: ${{ env.projectName }}.${{ needs.build.outputs.NuGetVersionV2 }}.symbols.nupkg
-          asset_content_type: application/zip
+      # - name: Upload release asset for symbol package
+      #   id: upload-release-asset-symbolpackage
+      #   uses: actions/upload-release-asset@v1.0.2
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: ${{ env.projectName }}.${{ needs.build.outputs.NuGetVersionV2 }}.symbols.nupkg
+      #     asset_name: ${{ env.projectName }}.${{ needs.build.outputs.NuGetVersionV2 }}.symbols.nupkg
+      #     asset_content_type: application/zip
