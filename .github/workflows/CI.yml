@@ -25,42 +25,23 @@ jobs:
     - name: Fetch all history for all tags and branches
       run: git fetch --prune --unshallow --tags
 
-    - name: Setup .NET Core 3.1
-      uses: actions/setup-dotnet@v2
+    - name: Setup up .NET
+      uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '3.1.x'
-
-    - name: Setup .NET 6
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: '6.0.x'
-
-    - name: Setup .NET 7
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: '7.0.x'
-
-    - name: Setup .NET 8
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: '8.0.x'
-
-    - name: Setup .NET 9
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: '9.0.x'
+        dotnet-version: |
+          6.0.x
+          7.0.x
+          9.0.x
+          8.0.x
     
-    - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v0.9.7
+    - name: Setup GitVersion
+      uses: gittools/actions/gitversion/setup@v3.1.11
       with:
-        versionSpec: '5.5.0'
+        versionSpec: '6.0.x'
       
-    - name: Determine Version
-      id: gitversion # step id used as reference for output values
-      uses: gittools/actions/gitversion/execute@v0.9.7
-      with:
-        useConfigFile: true
-        configFilePath: ./GitVersion.yml
+    - name: Calculate version
+      id: gitversion
+      uses: gittools/actions/gitversion/execute@v3.1.11
 
     - name: Update project version
       uses: roryprimrose/set-vs-sdk-project-version@v1

@@ -1,7 +1,14 @@
 mode: ContinuousDeployment
+
 branches:
   main:
-    tag: beta
-  hotfix:
-    tag: useBranchName
+    regex: ^main$
+    label: beta
+    is-release-branch: false
+    increment: Patch
+    track-merge-target: false
 
+  hotfix:
+    regex: ^hotfix/
+    label: hotfix
+    increment: Patch
