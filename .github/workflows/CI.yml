@@ -72,7 +72,8 @@ jobs:
         run: Add-Content -Path ${env:GITHUB_ENV} "`nprojectName=$(${env:GITHUB_REPOSITORY}.substring(${env:GITHUB_REPOSITORY}.IndexOf('/') + 1))" -Encoding utf8
         
       - name: Pack
-        run: dotnet pack "./${{ env.projectName }}/${{ env.projectName }}.csproj" -c Release --no-build --include-symbols -o $GITHUB_WORKSPACE/staging
+        run: dotnet pack "./${{ env.projectName }}/${{ env.projectName }}.csproj" -c Release --no-build -o $GITHUB_WORKSPACE/staging
+        #run: dotnet pack "./${{ env.projectName }}/${{ env.projectName }}.csproj" -c Release --no-build --include-symbols -o $GITHUB_WORKSPACE/staging
      
       - name: Verify artifact path
         run: ls -la staging
