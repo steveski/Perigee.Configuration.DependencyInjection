@@ -1,6 +1,7 @@
 mode: ContinuousDeployment
 branches:
-  master:
+  main:
     tag: beta
   hotfix:
     tag: useBranchName
+
