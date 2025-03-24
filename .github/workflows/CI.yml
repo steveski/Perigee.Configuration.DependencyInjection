@@ -59,13 +59,13 @@ jobs:
       - name: Test
         run: dotnet test --configuration Release --no-build --collect:"XPlat Code Coverage" --logger "trx;LogFileName=test_results.trx"
       
-      - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          slug: steveski/Perigee.Configuration.DependencyInjection
-          files: '**/coverage.cobertura.xml'
-          fail_ci_if_error: true
+      # - name: Upload Coverage to Codecov
+      #   uses: codecov/codecov-action@v5
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      #     slug: steveski/Perigee.Configuration.DependencyInjection
+      #     files: '**/coverage.cobertura.xml'
+      #     fail_ci_if_error: true
      
       - name: Resolve project name
         shell: pwsh
