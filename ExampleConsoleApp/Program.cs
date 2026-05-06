@@ -16,3 +16,6 @@ var host = Host.CreateDefaultBuilder(args)
 
 var app = host.Services.GetRequiredService<App>();
 await app.Run();
+await Task.Delay(20000);
+await app.Run();
+Console.ReadKey();

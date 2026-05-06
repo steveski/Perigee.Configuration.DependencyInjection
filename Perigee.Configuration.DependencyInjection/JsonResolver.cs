@@ -35,6 +35,7 @@ public class JsonResolver : IConfigurationResolver
     public IConfiguration? Resolve()
     {
         var builder = new ConfigurationBuilder()
+            .SetBasePath(System.IO.Directory.GetCurrentDirectory())
             .AddJsonFile(JsonFilename, false, true);
 
         ConfigureBuilder(builder);

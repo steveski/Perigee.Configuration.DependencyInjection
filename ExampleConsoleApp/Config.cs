@@ -11,4 +11,5 @@ public interface IDatabase
     string? ConnectionString { get; set; }
     bool SomethingElse { get; set; }
     string? Snootch { get; set; }
+    string? Boo { get; set; }
 }
