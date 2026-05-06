@@ -1,17 +1,17 @@
-﻿namespace ExampleConsoleApp;
+namespace ExampleConsoleApp;
 
 public class App
 {
-    private readonly IDatabase _databaseConfig;
+    private readonly IConfig _config;
 
-    public App(IDatabase databaseConfig)
+    public App(IConfig config, IDatabase db)
     {
-        _databaseConfig = databaseConfig;
+        _config = config;
     }
 
     public Task Run()
     {
-        Console.Write(_databaseConfig.ConnectionString);
+        Console.WriteLine($"DB Connection is {_config.Database?.ConnectionString}");
 
         return Task.CompletedTask;
     }

@@ -1,15 +1,14 @@
-﻿namespace Perigee.Configuration.DependencyInjection;
+namespace Perigee.Configuration.DependencyInjection;
 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
 using System.Reflection;
 
 /// <summary>
 /// The <see cref="ConfigurationRegistrar"/>
-/// class is used to register nested configuration types.
+/// class is used to register nested configuration interface types dynamically.
 /// </summary>
 public class ConfigurationRegistrar
 {
@@ -24,8 +23,17 @@ public class ConfigurationRegistrar
         _resolver = resolver ?? throw new ArgumentNullException(nameof(resolver));
     }
 
-    public void RegisterConfiguration(IServiceCollection serviceCollection)
+    /// <summary>
+    /// Registers the configuration root and all nested interfaces.
+    /// </summary>
+    /// <typeparam name="TInterface">The root interface of the configuration.</typeparam>
+    public void RegisterConfiguration<TInterface>(IServiceCollection serviceCollection) where TInterface : class
     {
+        if (!typeof(TInterface).IsInterface)
+        {
+            throw new InvalidOperationException("Generic type TInterface must be an interface.");
+        }
+
         var configuration = _resolver.Resolve();
 
         if (configuration is null)
@@ -33,166 +41,47 @@ public class ConfigurationRegistrar
             return;
         }
 
-        var configType = configuration.GetType();
-
-        if (configType.IsValueType)
-        {
-            return;
-        }
-
-        if (configType == typeof(string))
-        {
-            return;
-        }
-
-        var referenceTracker = new List<object>();
-
-        RegisterConfigTypes(serviceCollection, configuration, referenceTracker);
+        var registeredTypes = new HashSet<Type>();
+        RegisterInterfaceRecursively(serviceCollection, typeof(TInterface), configuration, registeredTypes);
     }
 
-    private static void AssignEnvironmentOverride(object configuration, PropertyInfo property)
-    {
-        // Check if there is an environment variable override defined on the property
-        var attribute = property.GetCustomAttributes().OfType<EnvironmentOverrideAttribute>().FirstOrDefault();
-
-        if (attribute == null)
-        {
-            return;
-        }
-
-        var key = attribute.Variable;
-
-        AssignEnvironmentVariable(configuration, property, key);
-    }
-
-    private static void AssignEnvironmentVariable(object configuration, PropertyInfo property, string key)
-    {
-        var value = Environment.GetEnvironmentVariable(key);
-
-        if (value == null)
-        {
-            return;
-        }
-
-        try
-        {
-            var converter = TypeDescriptor.GetConverter(property.PropertyType);
-            object? converted;
-
-            if (converter.CanConvertFrom(typeof(string)))
-            {
-                converted = converter.ConvertFromString(value);
-            }
-            else
-            {
-                // Try a straight change type
-                // Attempt to convert the value to the target type
-                converted = Convert.ChangeType(value, property.PropertyType);
-            }
-
-            // If we got this far then the conversion from the environment variable string was ok to the target property type
-            // Set the value back on the property
-            property.SetValue(configuration, converted);
-        }
-        catch (Exception)
-        {
-            // We don't want to break the application if we don't have good data to play with
-        }
-    }
-
-    private static void RegisterConfigTypes(
+    private void RegisterInterfaceRecursively(
         IServiceCollection serviceCollection,
-        object? configuration,
-        ICollection<object> referenceTracker)
+        Type interfaceType,
+        IConfiguration currentConfig,
+        HashSet<Type> registeredTypes)
     {
-        if (configuration is null)
-        {
-            return;
-        }
-
-        if (referenceTracker.Any(x => ReferenceEquals(configuration, x)))
+        if (registeredTypes.Contains(interfaceType))
         {
             // We found a circular reference
             return;
         }
 
-        var configType = configuration.GetType();
+        registeredTypes.Add(interfaceType);
 
-        if (configType.IsValueType)
+        // Register the proxy factory for this interface
+        var proxyCreateMethod = typeof(ConfigurationDispatchProxy)
+            .GetMethod(nameof(ConfigurationDispatchProxy.Create))!
+            .MakeGenericMethod(interfaceType);
+
+        serviceCollection.AddSingleton(interfaceType, sp =>
         {
-            // Skip value types
-            return;
-        }
+            return proxyCreateMethod.Invoke(null, new object[] { currentConfig })!;
+        });
 
-        if (configType == typeof(string))
-        {
-            // Skip strings
-            return;
-        }
-
-        if (configType.GetInterfaces().Length > 0)
-        {
-            foreach (var interfaceType in configType.GetInterfaces())
-            {
-                serviceCollection.AddTransient(interfaceType, c => configuration);
-            }
-        }
-
-        serviceCollection.AddTransient(configType, c => configuration);
-
-        referenceTracker.Add(configuration);
-
-        // Register all the properties of the configuration as their interfaces This must be done
-        // after registering assembly types and modules because type scanning may have already
-        // registered the configuration classes as their interfaces which means Autofac will
-        // return the default classes rather than these configuration instances that have values populated.
-        var properties = configuration.GetType().GetProperties();
+        // Register all properties that return another interface
+        var properties = interfaceType.GetProperties();
 
         foreach (var property in properties)
         {
-            if (property.CanRead == false)
+            var returnType = property.PropertyType;
+
+            // Only recurse into interfaces (excluding basic primitives/strings if they somehow slipped into the logic)
+            if (returnType.IsInterface && returnType != typeof(string))
             {
-                // Ignore any property that we can't read
-                continue;
+                var section = currentConfig.GetSection(property.Name);
+                RegisterInterfaceRecursively(serviceCollection, returnType, section, registeredTypes);
             }
-
-            var parameters = property.GetIndexParameters();
-
-            if (parameters.Length > 0)
-            {
-                // This is an indexer property which we don't support
-                // Skip over it and continue to find property values that we can try to register
-                continue;
-            }
-
-            object? value;
-
-            try
-            {
-                value = property.GetValue(configuration);
-            }
-            catch (Exception)
-            {
-                // We failed to read the property so we can't process it
-                // We also don't want to crash the application so ignore this failure
-                continue;
-            }
-
-            if (property.CanWrite)
-            {
-                // Attempt to assign the property value to an environment variable identified by the attribute
-                AssignEnvironmentOverride(configuration, property);
-
-                if (value is string stringValue)
-                {
-                    // The value of the property may point to an environment variable
-                    // Attempt to assign the property value to the environment variable
-                    AssignEnvironmentVariable(configuration, property, stringValue);
-                }
-            }
-
-            // Recurse into the child properties
-            RegisterConfigTypes(serviceCollection, value, referenceTracker);
         }
     }
 }

@@ -146,8 +146,18 @@ You can source json configuration fro registration from a Stream which is useful
     .
     .
 
+    .
+    .
+
 ```
 
+### Changelog
+
+**v2.0.0 (Major Architecture Shift)**
+* **Pure Interfaces:** Concrete POCO classes are no longer required or supported. You now define your configuration strictly using `interface` definitions.
+* **Dynamic Proxies:** The library now generates implementations for your interfaces at runtime using `System.Reflection.DispatchProxy`.
+* **Instant Hot-Reloading:** Injected interfaces now dynamically evaluate their property getters against the underlying `IConfigurationRoot`. If `appsettings.json` is modified while the application is running, the injected interfaces (even Singletons!) instantly reflect the new values without requiring application restarts or `IOptionsMonitor`.
+* **Removed `[EnvironmentOverride]`:** Standard `.NET` environment variable overriding now works natively through the core `IConfiguration` pipeline, making custom attributes obsolete.
 
 This project is based on Rory Primrose's work https://github.com/roryprimrose/Divergic.Configuration.Autofac but removed the dependency on AutoFac sticking with the built in Microsoft DI.
 

@@ -1,17 +1,16 @@
-﻿namespace Perigee.Configuration.DependencyInjection;
+namespace Perigee.Configuration.DependencyInjection;
 
 using Microsoft.Extensions.Configuration;
 using System;
 
 /// <summary>
-/// The <see cref="JsonResolver{T}"/>
+/// The <see cref="JsonResolver"/>
 /// class provides configuration support for loading the configuration from a json file.
 /// </summary>
-/// <typeparam name="T">The type of class to create from the configuration file.</typeparam>
-public class JsonResolver<T> : IConfigurationResolver
+public class JsonResolver : IConfigurationResolver
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="JsonResolver{T}"/>.
+    /// Initializes a new instance of the <see cref="JsonResolver"/>.
     /// </summary>
     public JsonResolver()
     {
@@ -19,7 +18,7 @@ public class JsonResolver<T> : IConfigurationResolver
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="JsonResolver{T}"/>.
+    /// Initializes a new instance of the <see cref="JsonResolver"/>.
     /// </summary>
     /// <param name="filename">The filename of the json file to load.</param>
     public JsonResolver(string filename)
@@ -33,21 +32,16 @@ public class JsonResolver<T> : IConfigurationResolver
     }
 
     /// <inheritdoc />
-    public object Resolve()
+    public IConfiguration? Resolve()
     {
         var builder = new ConfigurationBuilder()
             .AddJsonFile(JsonFilename, false, true);
 
         ConfigureBuilder(builder);
 
-        var configurationRoot = builder
-            .Build();
+        var configurationRoot = builder.Build();
 
-        //var config = configurationRoot.Get(typeof(T));
-        var config = configurationRoot.Get<T>();
-        return config == null
-            ? throw new InvalidOperationException($"Unable to load appsettings Configuration {typeof(T)}")
-            : (object)config;
+        return configurationRoot;
     }
 
     /// <summary>
