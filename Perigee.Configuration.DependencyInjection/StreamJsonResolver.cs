@@ -1,12 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 
 namespace Perigee.Configuration.DependencyInjection;
 
 /// <summary>
-/// The <see cref="StreamJsonResolver{T}"/> class provides configuration support for loading the configuration from a json stream.
+/// The <see cref="StreamJsonResolver"/> class provides configuration support for loading the configuration from a json stream.
 /// </summary>
-/// <typeparam name="T">The type of class to create from the configuration file.</typeparam>
-public class StreamJsonResolver<T> : IConfigurationResolver
+public class StreamJsonResolver : IConfigurationResolver
 {
     private readonly Stream _stream;
 
@@ -15,20 +14,16 @@ public class StreamJsonResolver<T> : IConfigurationResolver
         _stream = stream;
     }
 
-    public object? Resolve()
+    public IConfiguration? Resolve()
     {
         var builder = new ConfigurationBuilder()
             .AddJsonStream(_stream);
 
         ConfigureBuilder(builder);
 
-        var configurationRoot = builder
-            .Build();
+        var configurationRoot = builder.Build();
 
-        //var config = configurationRoot.Get(typeof(T));
-        var config = configurationRoot.Get<T>();
-
-        return config;
+        return configurationRoot;
     }
 
     /// <summary>

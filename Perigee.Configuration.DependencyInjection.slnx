@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="ExampleConsoleApp/ExampleConsoleApp.csproj" />
+  <Project Path="ExampleConsoleEmbeddedResource/ExampleConsoleEmbeddedResource.csproj" />
+  <Project Path="Perigee.Configuration.DependencyInjection.IntegrationTests/Perigee.Configuration.DependencyInjection.IntegrationTests.csproj" />
+  <Project Path="Perigee.Configuration.DependencyInjection/Perigee.Configuration.DependencyInjection.csproj" />
+</Solution>

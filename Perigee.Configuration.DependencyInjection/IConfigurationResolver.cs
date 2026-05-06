@@ -1,4 +1,6 @@
-﻿namespace Perigee.Configuration.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+
+namespace Perigee.Configuration.DependencyInjection;
 
 /// <summary>
 /// The <see cref="IConfigurationResolver"/>
@@ -7,8 +9,8 @@
 public interface IConfigurationResolver
 {
     /// <summary>
-    /// Resolves the root configuration value.
+    /// Resolves the root configuration.
     /// </summary>
-    /// <returns>The configuration value.</returns>
-    object? Resolve();
+    /// <returns>The configuration.</returns>
+    IConfiguration? Resolve();
 }

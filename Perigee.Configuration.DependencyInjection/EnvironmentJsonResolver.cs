@@ -1,19 +1,18 @@
-﻿namespace Perigee.Configuration.DependencyInjection;
+namespace Perigee.Configuration.DependencyInjection;
 
 using Microsoft.Extensions.Configuration;
 using System;
 
 /// <summary>
-/// The <see cref="EnvironmentJsonResolver{T}"/>
+/// The <see cref="EnvironmentJsonResolver"/>
 /// class is used to resolve configuration from a JSON settings file including an environment JSON file.
 /// </summary>
-/// <typeparam name="T">The type of class to create from the configuration file.</typeparam>
-public class EnvironmentJsonResolver<T> : JsonResolver<T>
+public class EnvironmentJsonResolver : JsonResolver
 {
     private readonly string _environmentFilename;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="EnvironmentJsonResolver{T}"/>.
+    /// Initializes a new instance of the <see cref="EnvironmentJsonResolver"/>.
     /// </summary>
     /// <param name="environmentFilename">The filename of the environment specific json configuration to load.</param>
     public EnvironmentJsonResolver(string environmentFilename)
@@ -27,7 +26,7 @@ public class EnvironmentJsonResolver<T> : JsonResolver<T>
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="EnvironmentJsonResolver{T}"/>.
+    /// Initializes a new instance of the <see cref="EnvironmentJsonResolver"/>.
     /// </summary>
     /// <param name="filename">The filename of the json configuration to load.</param>
     /// <param name="environmentFilename">The filename of the environment specific json configuration to load.</param>
